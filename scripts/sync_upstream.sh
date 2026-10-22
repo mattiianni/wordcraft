@@ -45,6 +45,10 @@ if [ -d "/Applications/WordCraft.app" ]; then
     xattr -cr /Applications/WordCraft.app
     codesign --force --deep --sign - /Applications/WordCraft.app 2>/dev/null || true
     echo "Applicazione aggiornata e firmata con successo in /Applications/WordCraft.app!"
+
+    echo "Aggiornamento pacchetto WordCraft.zip sulla Scrivania..."
+    (cd /Applications && rm -f /Users/mattiaianniello/Desktop/WordCraft.zip && COPYFILE_DISABLE=1 zip -r -y -q /Users/mattiaianniello/Desktop/WordCraft.zip WordCraft.app -x "*.DS_Store" -x "*__MACOSX*")
+    echo "Pacchetto WordCraft.zip su Scrivania aggiornato con successo!"
 fi
 
 echo "Pulizia cartella target per risparmiare spazio su disco..."
@@ -52,5 +56,6 @@ cargo clean
 
 echo "Aggiornamento del fork su GitHub..."
 git push --force-with-lease fork "$CURRENT_BRANCH" || true
+git push --force-with-lease fork "$CURRENT_BRANCH":main || true
 
 echo "=== [WordCraft] Aggiornamento completato con successo! ==="
