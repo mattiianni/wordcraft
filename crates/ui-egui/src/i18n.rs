@@ -423,7 +423,15 @@ pub fn tr(lang: Lang, s: &str) -> &str {
     if pseudo::on() {
         return I18N.t(craft_i18n::Lang::PSEUDO, s);
     }
-    lang.i18n().t(lang.lang, s)
+    let out = lang.i18n().t(lang.lang, s);
+    if out == s && lang.code() == "it" {
+        return match s {
+            "Collapse the Ribbon" => "Comprimere la barra multifunzione",
+            "Expand the Ribbon" => "Espandere la barra multifunzione",
+            _ => out,
+        };
+    }
+    out
 }
 
 /// Left-to-right mark: it keeps what it touches from joining a right-to-left run next to it.

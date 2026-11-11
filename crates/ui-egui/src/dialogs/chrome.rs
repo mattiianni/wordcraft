@@ -84,10 +84,14 @@ pub(crate) fn block_behind(app: &WordApp, ctx: &egui::Context, window: &egui::Re
     // egui's hit test doesn't look at the modal layer, so a transparent backdrop just under the
     // window takes the clicks; nothing is dimmed, as in Word.
     let screen = ctx.content_rect();
+    let t = Tokens::get(ctx);
     let backdrop = egui::Area::new(layer.id.with("modal_backdrop"))
         .order(layer.order)
         .fixed_pos(screen.min)
-        .show(ctx, |ui| ui.allocate_rect(screen, Sense::CLICK | Sense::DRAG))
+        .show(ctx, |ui| {
+            ui.painter().rect_filled(screen, 0.0, egui::Color32::from_black_alpha(if t.dark { 100 } else { 45 }));
+            ui.allocate_rect(screen, Sense::CLICK | Sense::DRAG)
+        })
         .inner;
     // The backdrop also has the pointer just inside the window's edge (egui's hit radius).
     let beside = ctx.input(|i| i.pointer.any_pressed() && i.pointer.press_origin().is_some_and(|p| !window.rect.contains(p)));

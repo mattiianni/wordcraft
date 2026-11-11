@@ -102,11 +102,22 @@ fn paint_clipboard_to_insert(pen: &Pen, name: &str) -> bool {
     match name {
         // Clipboard
         "paste" => {
-            pen.rect(4.0, 3.5, 14.0, 17.0, c);
-            pen.frect(7.0, 2.0, 11.0, 5.0, a);
-            pen.frect(9.0, 8.0, 17.5, 18.5, pen.a.linear_multiply(0.18));
-            pen.rect(9.0, 8.0, 17.5, 18.5, a);
-            pen.lines(10.8, 15.8, &[11.0, 13.5, 16.0]);
+            let wood = Color32::from_rgb(0xD9, 0x9B, 0x26);
+            let clip = Color32::from_rgb(0x70, 0x6E, 0x6C);
+            // Clipboard backing board
+            pen.frect(3.5, 3.5, 14.5, 17.5, wood);
+            pen.rect(3.5, 3.5, 14.5, 17.5, Color32::from_rgb(0xB8, 0x7E, 0x14));
+            // Top clip
+            pen.frect(6.5, 2.0, 11.5, 4.5, clip);
+            pen.rect(6.5, 2.0, 11.5, 4.5, c);
+            // White document sheet
+            pen.frect(7.5, 7.0, 17.0, 18.0, Color32::WHITE);
+            pen.rect(7.5, 7.0, 17.0, 18.0, Color32::from_rgb(0x8A, 0x88, 0x86));
+            // Faint subtle document text lines
+            let line_color = Color32::from_rgb(0xA0, 0xA0, 0xA0);
+            pen.line_c(&[(9.5, 10.5), (15.0, 10.5)], line_color);
+            pen.line_c(&[(9.5, 13.0), (15.0, 13.0)], line_color);
+            pen.line_c(&[(9.5, 15.5), (13.5, 15.5)], line_color);
         }
         "cut" => {
             pen.circle(6.0, 15.0, 2.5, c);
@@ -117,13 +128,20 @@ fn paint_clipboard_to_insert(pen: &Pen, name: &str) -> bool {
         "copy" => {
             pen.rect(3.5, 3.0, 12.5, 14.0, c);
             pen.frect(7.5, 6.5, 16.5, 17.5, Color32::TRANSPARENT);
-            pen.rect(7.5, 6.5, 16.5, 17.5, a);
+            pen.rect(7.5, 6.5, 16.5, 17.5, c);
         }
         "painter" => {
-            pen.frect(4.0, 3.0, 16.0, 8.0, yellow);
-            pen.rect(4.0, 3.0, 16.0, 8.0, c);
-            pen.line(&[(16.0, 5.5), (17.5, 5.5), (17.5, 10.0), (10.0, 10.0), (10.0, 12.0)]);
-            pen.frect(8.8, 12.0, 11.2, 18.0, c);
+            let wood = Color32::from_rgb(0xD9, 0x9B, 0x26);
+            let ferrule = Color32::from_rgb(0x9E, 0x9E, 0x9E);
+            // Paintbrush bristles (angled at top-right)
+            pen.fill(&[(11.0, 9.0), (14.0, 4.0), (17.5, 7.5), (14.5, 12.5)], yellow);
+            pen.closed(&[(11.0, 9.0), (14.0, 4.0), (17.5, 7.5), (14.5, 12.5)], Color32::from_rgb(0xC4, 0x84, 0x00));
+            // Ferrule band
+            pen.fill(&[(9.5, 10.5), (12.0, 8.0), (13.5, 9.5), (11.0, 12.0)], ferrule);
+            pen.closed(&[(9.5, 10.5), (12.0, 8.0), (13.5, 9.5), (11.0, 12.0)], c);
+            // Wooden handle (angled down to bottom-left)
+            pen.fill(&[(5.0, 16.5), (6.5, 18.0), (10.5, 12.5), (9.0, 11.0)], wood);
+            pen.closed(&[(5.0, 16.5), (6.5, 18.0), (10.5, 12.5), (9.0, 11.0)], Color32::from_rgb(0xB8, 0x7E, 0x14));
         }
         // Font
         "bold" => pen.text(10.0, 10.5, 15.0, "B", c, true),
@@ -137,20 +155,20 @@ fn paint_clipboard_to_insert(pen: &Pen, name: &str) -> bool {
             pen.line_c(&[(3.0, 10.5), (17.0, 10.5)], c);
         }
         "charborder" => {
-            pen.rect(3.0, 3.0, 17.0, 17.0, a);
+            pen.rect(3.0, 3.0, 17.0, 17.0, c);
             pen.text(10.0, 6.0, 9.0, "A", c, false);
         }
         "enclose" => {
-            pen.circle(10.0, 10.5, 7.5, a);
+            pen.circle(10.0, 10.5, 7.5, c);
             pen.text(10.0, 10.5, 9.0, "A", c, false);
         }
         "subscript" => {
             pen.text(8.0, 9.0, 13.0, "x", c, false);
-            pen.text(15.0, 14.5, 8.0, "2", a, true);
+            pen.text(15.0, 14.5, 8.0, "2", c, true);
         }
         "superscript" => {
             pen.text(8.0, 11.0, 13.0, "x", c, false);
-            pen.text(15.0, 5.0, 8.0, "2", a, true);
+            pen.text(15.0, 5.0, 8.0, "2", c, true);
         }
         "grow" => {
             pen.text(8.0, 11.0, 15.0, "A", c, false);
@@ -184,45 +202,45 @@ fn paint_clipboard_to_insert(pen: &Pen, name: &str) -> bool {
             pen.frect(2.0, 16.5, 18.0, 19.0, red);
         }
         "effects" => {
-            pen.text(10.0, 10.0, 15.0, "A", a, true);
-            pen.text(10.5, 10.5, 15.0, "A", Color32::from_rgba_unmultiplied(0, 0, 0, 40), true);
+            pen.text(10.0, 10.0, 15.0, "A", c, false);
+            pen.text(10.5, 10.5, 15.0, "A", Color32::from_rgba_unmultiplied(0, 0, 0, 35), false);
         }
         "fontdialog" => pen.line(&[(13.0, 13.0), (17.0, 17.0), (17.0, 13.0)]),
         // Paragraph
         "bullets" => {
-            for (i, y) in [5.0, 10.0, 15.0].iter().enumerate() {
-                pen.fcircle(4.0, *y, 1.4, if i == 0 { a } else { c });
-                pen.line(&[(7.5, *y), (17.0, *y)]);
+            for y in [5.0, 10.0, 15.0] {
+                pen.fcircle(4.0, y, 1.4, a);
+                pen.line(&[(7.5, y), (17.0, y)]);
             }
         }
         "numbering" => {
             for (i, y) in [5.0, 10.0, 15.0].iter().enumerate() {
-                pen.text(4.0, *y, 6.0, &(i + 1).to_string(), if i == 0 { a } else { c }, true);
+                pen.text(4.0, *y, 6.0, &(i + 1).to_string(), a, true);
                 pen.line(&[(7.5, *y), (17.0, *y)]);
             }
         }
         "multilevel" => {
             pen.text(3.5, 4.5, 5.5, "1", a, true);
             pen.line(&[(6.5, 4.5), (17.0, 4.5)]);
-            pen.text(6.5, 10.0, 5.5, "a", c, true);
+            pen.text(6.5, 10.0, 5.5, "a", a, true);
             pen.line(&[(9.5, 10.0), (17.0, 10.0)]);
-            pen.text(9.5, 15.5, 5.5, "i", c, true);
+            pen.text(9.5, 15.5, 5.5, "i", a, true);
             pen.line(&[(12.0, 15.5), (17.0, 15.5)]);
         }
         "outdent" | "indent" => {
             pen.lines(9.0, 17.0, &[7.0, 10.0, 13.0]);
             pen.lines(3.0, 17.0, &[3.5, 16.5]);
             if name == "indent" {
-                pen.fill(&[(3.0, 7.0), (3.0, 13.0), (6.5, 10.0)], a);
+                pen.fill(&[(3.0, 7.0), (3.0, 13.0), (6.5, 10.0)], c);
             } else {
-                pen.fill(&[(6.5, 7.0), (6.5, 13.0), (3.0, 10.0)], a);
+                pen.fill(&[(6.5, 7.0), (6.5, 13.0), (3.0, 10.0)], c);
             }
         }
         "sort" => {
             pen.text(6.0, 5.5, 7.0, "A", c, true);
             pen.text(6.0, 14.5, 7.0, "Z", c, true);
-            pen.line_c(&[(14.0, 3.0), (14.0, 17.0)], a);
-            pen.line_c(&[(11.5, 14.5), (14.0, 17.0), (16.5, 14.5)], a);
+            pen.line_c(&[(14.0, 3.0), (14.0, 17.0)], c);
+            pen.line_c(&[(11.5, 14.5), (14.0, 17.0), (16.5, 14.5)], c);
         }
         "pilcrow" => pen.text(10.0, 10.5, 15.0, "¶", c, false),
         "alignLeft" => {
@@ -258,29 +276,24 @@ fn paint_clipboard_to_insert(pen: &Pen, name: &str) -> bool {
             pen.line_c(&[(2.5, 15.0), (4.5, 17.0), (6.5, 15.0)], a);
         }
         "shading" => {
-            pen.fill(&[(4.0, 9.0), (10.0, 3.0), (16.0, 9.0), (10.0, 15.0)], Color32::TRANSPARENT);
-            pen.closed(&[(4.0, 9.0), (10.0, 3.0), (16.0, 9.0), (10.0, 15.0)], c);
-            pen.fcircle(16.5, 13.5, 1.6, a);
+            // Paint bucket tilted pouring a drop (Word paint bucket icon)
+            pen.closed(&[(4.5, 9.5), (10.0, 4.0), (14.5, 8.5), (9.0, 14.0)], c);
+            pen.line(&[(6.0, 8.0), (8.5, 5.5)]);
+            // Pouring drop
+            pen.fill(&[(13.5, 12.0), (15.5, 12.0), (14.5, 14.5)], c);
             pen.frect(2.0, 16.5, 18.0, 19.0, yellow);
         }
         // The Shading buttons draw the last colour as their own bar, so this has no bar of its own.
         "shadingNoBar" => {
-            pen.fill(&[(4.0, 9.0), (10.0, 3.0), (16.0, 9.0), (10.0, 15.0)], Color32::TRANSPARENT);
-            pen.closed(&[(4.0, 9.0), (10.0, 3.0), (16.0, 9.0), (10.0, 15.0)], c);
-            pen.fcircle(16.5, 13.5, 1.6, a);
+            pen.closed(&[(4.5, 9.5), (10.0, 4.0), (14.5, 8.5), (9.0, 14.0)], c);
+            pen.line(&[(6.0, 8.0), (8.5, 5.5)]);
+            pen.fill(&[(13.5, 12.0), (15.5, 12.0), (14.5, 14.5)], c);
         }
         "borders" => {
-            for y in [3.0, 10.0, 17.0] {
-                for x in [3.0, 6.5, 10.0, 13.5, 17.0] {
-                    pen.fcircle(x, y, 0.6, c);
-                }
-            }
-            for x in [3.0, 10.0, 17.0] {
-                for y in [6.5, 13.5] {
-                    pen.fcircle(x, y, 0.6, c);
-                }
-            }
-            pen.line_c(&[(3.0, 17.0), (17.0, 17.0)], a);
+            // Clean 4-quadrant window frame border icon
+            pen.rect(3.5, 3.5, 16.5, 16.5, c);
+            pen.line(&[(3.5, 10.0), (16.5, 10.0)]);
+            pen.line(&[(10.0, 3.5), (10.0, 16.5)]);
         }
         // Editing
         "find" => {

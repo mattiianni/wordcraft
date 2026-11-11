@@ -279,7 +279,12 @@ impl Reader<'_> {
     fn read_pic(&mut self, pic: &El, rels: &Rels, w: f32, h: f32, alt: String, mut float: Float) -> Option<InlineObject> {
         let blip = pic.find("a:blip")?;
         float.set_spin(xfrm_spin(pic.find("pic:spPr")));
-        let Some(embed) = blip.attr("r:embed") else {
+        let Some(embed) = blip
+            .attr("r:embed")
+            .or_else(|| blip.find("asvg:svgBlip").and_then(|s| s.attr("r:embed")))
+            .or_else(|| pic.find("asvg:svgBlip").and_then(|s| s.attr("r:embed")))
+            .or_else(|| blip.attr("r:link").filter(|id| rels.by_id(id).is_some_and(|r| !r.external)))
+        else {
             // A linked picture holds no copy: nothing to draw, and nothing is fetched.
             if let Some(link) = blip.attr("r:link") {
                 let target = rels.by_id(link).map_or_else(|| link.to_string(), |r| r.target.clone());

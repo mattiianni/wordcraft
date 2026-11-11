@@ -126,6 +126,23 @@ impl Reader<'_> {
                 let props = self.run_props_none(ctx);
                 self.read_run_child(sc, pb, k, (&props, rels), &mut None, depth + 1);
             }
+            // Third-party generators or conversions may place drawings, picts, footnotes, or text directly under w:p
+            "w:drawing"
+            | "w:pict"
+            | "w:object"
+            | "w:contentPart"
+            | "w:footnoteReference"
+            | "w:endnoteReference"
+            | "w:footnoteRef"
+            | "w:endnoteRef"
+            | "w:t" => {
+                let props = self.run_props_none(ctx);
+                let mut note = None;
+                self.read_run_child(sc, pb, k, (&props, rels), &mut note, depth + 1);
+                if let Some((kind, id, custom)) = note.take() {
+                    self.emit_obj(sc, pb, InlineObject::NoteRef { kind, id, custom: custom.unwrap_or_default() }, &props);
+                }
+            }
             _ => {}
         }
     }

@@ -147,7 +147,13 @@ pub fn autocorrect_word(s: &mut Session, on_enter: bool) -> Result<(), CmdError>
     } else {
         last
     };
-    let mut sentence = sentence_on && starts_sentence(before_word, &exceptions) && should_capitalize(first, next);
+    let is_empty = before_word.trim().is_empty();
+    let eligible = if is_empty {
+        if f.path.cell().is_some() { ac.cap_cells } else { ac.cap_paragraphs }
+    } else {
+        sentence_on && starts_sentence(before_word, &exceptions)
+    };
+    let mut sentence = eligible && should_capitalize(first, next);
     let prev = if sentence { prev_token(before_word) } else { String::new() };
     // Typing the word again after backspacing an automatic capital: the user doesn't want it
     // (Word's "Automatically add words to list"); an exception, so no capital this time either.
@@ -377,7 +383,7 @@ const DAYS: [&str; 7] = ["monday", "tuesday", "wednesday", "thursday", "friday",
 fn starts_sentence(before: &str, exceptions: &[String]) -> bool {
     let t = before.trim_end();
     if t.is_empty() {
-        return true;
+        return false;
     }
     if t.len() == before.len() {
         return false; // no space between the previous text and the word
@@ -385,6 +391,9 @@ fn starts_sentence(before: &str, exceptions: &[String]) -> bool {
     let t = t.trim_end_matches(|c: char| "\"'”’)]".contains(c));
     if !t.ends_with(['.', '!', '?']) || t.ends_with("..") || t.ends_with('…') {
         return false;
+    }
+    if !t.ends_with('.') {
+        return true;
     }
     let prev = t.rsplit(char::is_whitespace).next().unwrap_or(t).trim_start_matches(|c: char| "\"'“‘([".contains(c));
     let lower = prev.to_lowercase();

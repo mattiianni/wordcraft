@@ -224,7 +224,7 @@ impl Highlight {
 }
 
 /// The text size, in points, of a run whose size no style or default sets.
-pub const DEFAULT_FONT_SIZE: f32 = 11.0;
+pub const DEFAULT_FONT_SIZE: f32 = 12.0;
 
 /// Character formatting (direct or in a style). `None` = inherit.
 #[derive(Clone, Debug, PartialEq, Default, Serialize, Deserialize)]

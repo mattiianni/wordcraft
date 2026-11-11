@@ -258,11 +258,12 @@ pub fn command_menu(resp: &Response, app: &mut WordApp, id: &str) {
     });
 }
 
-/// "Customize the Ribbon…" and "Customize Quick Access Toolbar…" (context menus), and "Show
-/// Quick Access Toolbar" while the toolbar is hidden (#1945).
+/// "Customize the Ribbon…" and "Customize Quick Access Toolbar…" (context menus),
+/// "Show/Hide Quick Access Toolbar", and "Collapse/Expand the Ribbon" (#1945).
 pub fn customize_menu_items(ui: &mut Ui, app: &mut WordApp) {
-    if !app.ui.quick_access_toolbar && ui.button(tl!("Show Quick Access Toolbar")).clicked() {
-        let _ = app.run("ui.quickAccessToolbar", serde_json::json!({"value": true}));
+    let qat_label = if app.ui.quick_access_toolbar { tl!("Hide Quick Access Toolbar") } else { tl!("Show Quick Access Toolbar") };
+    if ui.button(qat_label).clicked() {
+        let _ = app.run("ui.quickAccessToolbar", serde_json::json!({"value": !app.ui.quick_access_toolbar}));
         ui.close();
     }
     if ui.button(tl!("Customize the Ribbon…")).clicked() {
@@ -271,6 +272,11 @@ pub fn customize_menu_items(ui: &mut Ui, app: &mut WordApp) {
     }
     if ui.button(tl!("Customize Quick Access Toolbar…")).clicked() {
         crate::dialogs_ribbon::open(app, crate::dialogs_ribbon::Page::QuickAccess);
+        ui.close();
+    }
+    let collapse_label = if app.ui.ribbon_collapsed { tl!("Expand the Ribbon") } else { tl!("Collapse the Ribbon") };
+    if ui.button(collapse_label).clicked() {
+        let _ = app.run("ui.collapseRibbon", serde_json::json!({}));
         ui.close();
     }
 }

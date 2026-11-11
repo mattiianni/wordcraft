@@ -197,14 +197,19 @@ fn read_opened_in(pkg: &Package, chunks: ChunkState) -> Result<(Document, usize,
     r.doc.missing_pictures.main = main.clone();
     r.pc.major_font = r.doc.settings.major_font.clone();
     r.pc.minor_font = r.doc.settings.minor_font.clone();
-    let part = |t: &str| rels.by_type(t).filter(|x| !x.external).map(|x| x.target.clone());
+    let part = |t: &str, fallback: &str| {
+        rels.by_type(t)
+            .filter(|x| !x.external)
+            .map(|x| x.target.clone())
+            .or_else(|| (!fallback.is_empty() && pkg.get(fallback).is_some()).then(|| fallback.to_string()))
+    };
 
     // The font table and the fonts embedded through it ride along as opaque parts.
-    if let Some(p) = part(rt::FONT_TABLE) {
+    if let Some(p) = part(rt::FONT_TABLE, "word/fontTable.xml") {
         r.keep_part_tree(&p);
         r.read_font_families(&p);
     }
-    if let Some(p) = part(rt::THEME) {
+    if let Some(p) = part(rt::THEME, "word/theme/theme1.xml") {
         r.read_theme(&p);
     }
     // Secondary parts are optional: a broken one is skipped (logged), not fatal.
@@ -215,34 +220,34 @@ fn read_opened_in(pkg: &Package, chunks: ChunkState) -> Result<(Document, usize,
     };
     // Styles come before settings, but their theme colours already follow its colour mapping, and
     // their `…Bidi` theme fonts its theme font language.
-    if let Some(p) = part(rt::SETTINGS) {
+    if let Some(p) = part(rt::SETTINGS, "word/settings.xml") {
         r.read_color_mapping(&p);
     }
-    if let Some(p) = part(rt::STYLES) {
+    if let Some(p) = part(rt::STYLES, "word/styles.xml") {
         lenient("styles", r.read_styles(&p));
     }
-    if let Some(p) = part(rt::NUMBERING) {
+    if let Some(p) = part(rt::NUMBERING, "word/numbering.xml") {
         lenient("numbering", r.read_numbering(&p));
     }
     // Without a stated mode (or settings at all) Word lays a document out as Word 2007 did.
     r.doc.settings.compat_mode = wordcraft_doc::LEGACY_COMPAT_MODE;
-    if let Some(p) = part(rt::SETTINGS) {
+    if let Some(p) = part(rt::SETTINGS, "word/settings.xml") {
         lenient("settings", r.read_settings(&p));
     }
     // Comments before notes: a comment range inside a footnote or endnote resolves its id against
     // the comments already read, and was dropped when the notes came first.
-    if let Some(p) = part(rt::COMMENTS) {
-        let ex = part(rt::COMMENTS_EX);
-        let ids = part(rt::COMMENTS_IDS);
-        let cex = part(rt::COMMENTS_EXTENSIBLE);
+    if let Some(p) = part(rt::COMMENTS, "word/comments.xml") {
+        let ex = part(rt::COMMENTS_EX, "word/commentsExtended.xml");
+        let ids = part(rt::COMMENTS_IDS, "word/commentsIds.xml");
+        let cex = part(rt::COMMENTS_EXTENSIBLE, "word/commentsExtensible.xml");
         r.story = p.as_str().into();
         lenient("comments", r.read_comments(&p, ex.as_deref(), ids.as_deref(), cex.as_deref()));
     }
-    if let Some(p) = part(rt::FOOTNOTES) {
+    if let Some(p) = part(rt::FOOTNOTES, "word/footnotes.xml") {
         r.story = p.as_str().into();
         lenient("footnotes", r.read_notes(&p, true));
     }
-    if let Some(p) = part(rt::ENDNOTES) {
+    if let Some(p) = part(rt::ENDNOTES, "word/endnotes.xml") {
         r.story = p.as_str().into();
         lenient("endnotes", r.read_notes(&p, false));
     }
@@ -325,7 +330,7 @@ fn read_opened_in(pkg: &Package, chunks: ChunkState) -> Result<(Document, usize,
     // A macro project and every part it relates to (VBA data, signatures…) ride along as opaque
     // bytes, never parsed or run, so a .docm/.dotm saved again carries exactly what the file had.
     // Only the relationships and content types are read.
-    if let Some(v) = part(rt::VBA_PROJECT)
+    if let Some(v) = part(rt::VBA_PROJECT, "word/vbaProject.bin")
         && let Some(b) = pkg.get_shared(&v).filter(|b| !b.is_empty())
     {
         r.doc.passthrough.insert(VBA_PROJECT_PART.into(), b.clone());

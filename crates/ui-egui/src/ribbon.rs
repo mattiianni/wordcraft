@@ -323,7 +323,7 @@ pub fn show(app: &mut WordApp, ui: &mut Ui) {
                                 }
                                 let resp = if cut && ghost.is_none() { resp.on_hover_text(shown) } else { resp };
                                 if active {
-                                    let u = Rect::from_center_size(pos2(r.center().x + shift.x, r.max.y - 2.0), vec2(w - 16.0, 3.0));
+                                    let u = Rect::from_center_size(pos2(r.center().x + shift.x, r.max.y - 1.5), vec2((w - 12.0).max(24.0), 3.0));
                                     slide_underline(ui, tab, u, t.accent.gamma_multiply(entry), now, animate);
                                 }
                                 if resp.clicked() {
@@ -386,7 +386,11 @@ pub fn show(app: &mut WordApp, ui: &mut Ui) {
     egui::Panel::top("ribbon")
         .exact_size(CONTENT_H + LABEL_H + 10.0)
         .frame(
-            egui::Frame::NONE.fill(t.ribbon).inner_margin(egui::Margin { left: 8, right: 8, top: 4, bottom: 4 }).stroke(Stroke::new(1.0, t.border)),
+            egui::Frame::NONE
+                .fill(t.ribbon)
+                .corner_radius(egui::CornerRadius::same(8))
+                .inner_margin(egui::Margin { left: 8, right: 8, top: 4, bottom: 4 })
+                .stroke(Stroke::new(1.0, t.border)),
         )
         .show(ui, |ui| {
             // Bring newly selected ribbon content in from the side of its tab.

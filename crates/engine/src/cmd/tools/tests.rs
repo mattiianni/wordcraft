@@ -771,8 +771,14 @@ fn autocorrect_on_space() {
     for t in ["teh", " ", "Teh", " ", "(c)", " "] {
         s.run("text.insert", &json!({"text": t})).unwrap();
     }
-    // The first word of a sentence is capitalised too.
-    assert_eq!(s.doc.plain_text(StoryRef::Body), "The The © ");
+    // The first word of a paragraph is capitalised when cap_paragraphs is enabled.
+    assert_eq!(s.doc.plain_text(StoryRef::Body), "the The © ");
+    let mut s2 = Session::new(Document::new());
+    s2.prefs.autocorrect.cap_paragraphs = true;
+    for t in ["teh", " ", "Teh", " ", "(c)", " "] {
+        s2.run("text.insert", &json!({"text": t})).unwrap();
+    }
+    assert_eq!(s2.doc.plain_text(StoryRef::Body), "The The © ");
 }
 
 #[test]

@@ -67,6 +67,8 @@ pub struct AutoCorrectPrefs {
     pub two_initial_caps: bool,
     /// Capitalize the first letter of sentences.
     pub cap_sentences: bool,
+    /// Capitalize the first letter of paragraphs and list items.
+    pub cap_paragraphs: bool,
     /// Capitalize the first letter of table cells.
     pub cap_cells: bool,
     /// Capitalize names of days.
@@ -127,6 +129,7 @@ impl Default for AutoCorrectPrefs {
             replace_text: true,
             two_initial_caps: true,
             cap_sentences: true,
+            cap_paragraphs: false,
             cap_cells: true,
             cap_days: true,
             caps_lock: true,
@@ -134,7 +137,7 @@ impl Default for AutoCorrectPrefs {
             fractions: true,
             ordinals: true,
             bold_italic: false,
-            dashes: true,
+            dashes: false,
             links: true,
             bullets: true,
             numbering: true,
@@ -322,6 +325,7 @@ pub(super) fn autocorrect_options(s: &mut Session, v: &Value) -> CmdResult {
         ("replaceText", &mut ac.replace_text),
         ("twoInitialCaps", &mut ac.two_initial_caps),
         ("capSentences", &mut ac.cap_sentences),
+        ("capParagraphs", &mut ac.cap_paragraphs),
         ("capCells", &mut ac.cap_cells),
         ("capDays", &mut ac.cap_days),
         ("capsLock", &mut ac.caps_lock),
@@ -399,6 +403,7 @@ pub(super) fn autocorrect_options(s: &mut Session, v: &Value) -> CmdResult {
         "replaceText": ac.replace_text,
         "twoInitialCaps": ac.two_initial_caps,
         "capSentences": ac.cap_sentences,
+        "capParagraphs": ac.cap_paragraphs,
         "capCells": ac.cap_cells,
         "capDays": ac.cap_days,
         "capsLock": ac.caps_lock,

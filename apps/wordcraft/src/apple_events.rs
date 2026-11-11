@@ -45,8 +45,13 @@ pub fn poll(inbox: &Inbox, app: &mut WordApp, ctx: &egui::Context) {
             Event::Open(paths) => {
                 for p in paths.iter().filter_map(|p| p.to_str()) {
                     match app.open_from_platform(p, None) {
-                        // Leave Backstage, as opening from the Open dialog does.
-                        Ok(_) => app.ui.backstage = false,
+                        // Leave Backstage, as opening from the Open dialog does, and mark recovery checked if a file opened.
+                        Ok(_) => {
+                            app.ui.backstage = false;
+                            if app.session.path.is_some() {
+                                app.recovery_seen = true;
+                            }
+                        }
                         Err(e) => {
                             app.report_open_failure(p, &e);
                             // Backstage hides the status bar, so leave it to show the error.

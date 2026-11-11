@@ -789,8 +789,7 @@ fn backspace_and_delete() {
     run(&mut s, "text.insert", json!({"text": "cd"}));
     run(&mut s, "caret.home", json!({}));
     run(&mut s, "text.backspace", json!({}));
-    // Enter capitalised the first word, as Word's AutoCorrect does.
-    assert_eq!(text(&s), "Abcd");
+    assert_eq!(text(&s), "abcd");
     run(&mut s, "caret.docStart", json!({}));
     run(&mut s, "text.delete", json!({}));
     assert_eq!(text(&s), "bcd");
@@ -4676,8 +4675,8 @@ fn typed_paragraphs_are_capped_for_every_caller() {
     run(&mut s, "text.insert", json!({"text": at_cap, "paragraphs": true}));
     let paras = body_texts(&s);
     assert_eq!(paras.len(), MAX_TYPED_PARAGRAPHS);
-    // Each break is Enter's own, AutoCorrect included: the first sentence gets its capital.
-    assert_eq!((paras.first().map(String::as_str), paras.last().map(String::as_str)), (Some("Keepy"), Some("y")));
+    // Each break is Enter's own, AutoCorrect included; paragraph starts stay lowercase by default.
+    assert_eq!((paras.first().map(String::as_str), paras.last().map(String::as_str)), (Some("keepy"), Some("y")));
     assert!(s.undo(), "undo");
     assert_eq!(body_texts(&s).len(), 1, "one undo step takes every line back out");
     assert!(!body_texts(&s).iter().any(|p| p.contains('y')));
@@ -8314,19 +8313,19 @@ fn drag_after_multi_click_extends_by_units() {
         run(s, "select.dragUnit", json!({"unit": unit, "start": start, "end": end, "pos": pos}));
         (s.sel.anchor.clone(), s.sel.focus.clone())
     };
-    // Double-click "beta" (6..11 with its trailing space).
+    // Double-click "beta" (6..10 without trailing space).
     run(&mut s, "caret.set", json!({"pos": Pos::body(0, 7)}));
     run(&mut s, "select.word", json!({}));
     let (a, b) = s.sel.ordered();
-    assert_eq!((a.off, b.off), (6, 11));
+    assert_eq!((a.off, b.off), (6, 10));
     // Forward into the middle of "gamma": the whole word joins.
     assert_eq!(drag(&mut s, "word", a.clone(), b.clone(), Pos::body(0, 13)), (Pos::body(0, 6), Pos::body(0, 16)));
-    // Back into "Alpha": anchored at the end of "beta ", focus at the start of "Alpha".
-    assert_eq!(drag(&mut s, "word", a.clone(), b.clone(), Pos::body(0, 2)), (Pos::body(0, 11), Pos::body(0, 0)));
+    // Back into "Alpha": anchored at the end of "beta", focus at the start of "Alpha".
+    assert_eq!(drag(&mut s, "word", a.clone(), b.clone(), Pos::body(0, 2)), (Pos::body(0, 10), Pos::body(0, 0)));
     // Back inside the first word: just that word.
-    assert_eq!(drag(&mut s, "word", a.clone(), b.clone(), Pos::body(0, 8)), (Pos::body(0, 6), Pos::body(0, 11)));
+    assert_eq!(drag(&mut s, "word", a.clone(), b.clone(), Pos::body(0, 8)), (Pos::body(0, 6), Pos::body(0, 10)));
     // Into the next paragraph: whole word there.
-    assert_eq!(drag(&mut s, "word", a.clone(), b.clone(), Pos::body(1, 8)), (Pos::body(0, 6), Pos::body(1, 12)));
+    assert_eq!(drag(&mut s, "word", a.clone(), b.clone(), Pos::body(1, 8)), (Pos::body(0, 6), Pos::body(1, 11)));
 
     // Ctrl+click a sentence, drag into the next sentence.
     run(&mut s, "caret.set", json!({"pos": Pos::body(0, 3)}));
@@ -12462,6 +12461,7 @@ fn text_insert_marks_automatic_rewrites_as_transformed() {
     assert!(session.ime_edit_outcome().transformed, "list AutoFormat: {:?}", session.ime_edit_outcome());
 
     let mut session = s();
+    run(&mut session, "tools.autocorrect", json!({"dashes": true}));
     run(&mut session, "text.insert", json!({"text": "A--b"}));
     run(&mut session, "text.insert", json!({"text": " "}));
     assert!(session.ime_edit_outcome().transformed, "dash AutoFormat: {:?}", session.ime_edit_outcome());
@@ -12580,7 +12580,7 @@ fn scale_font_sizes_reaches_char_table_and_cs_sizes_and_unset_default() {
     Arc::make_mut(&mut s.doc.styles).styles.extend([ch, tb]);
     run(&mut s, "design.scaleFontSizes", json!({"delta": 2}));
     let st = &s.doc.styles;
-    assert_eq!(st.default_chr.size, Some(13.0), "unset default is 11 pt, made explicit");
+    assert_eq!(st.default_chr.size, Some(14.0), "unset default is 12 pt, made explicit");
     assert_eq!(st.default_chr.size_cs, Some(12.0));
     let big = CharProps { style: Some("Big".into()), ..Default::default() };
     assert_eq!(st.resolve_char(None, &big).size, 22.0);

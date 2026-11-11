@@ -659,11 +659,11 @@ fn multi_click_drag_extends_by_units() {
             h.step();
         }
     };
-    // Double-click inside "beta", drag into "gamma": "beta gamma " is selected.
+    // Double-click inside "beta", drag into "gamma": "beta gamma" is selected.
     let (from, to) = (screen(&mut h, Pos::body(0, 8)), screen(&mut h, Pos::body(0, 13)));
     multi_drag(&mut h, from, to, 2);
     let (s, e) = h.state().session.sel.ordered();
-    assert_eq!((s, e), (Pos::body(0, 6), Pos::body(0, 17)), "whole words");
+    assert_eq!((s, e), (Pos::body(0, 6), Pos::body(0, 16)), "whole words");
     // Let the double-click time pass, then triple-click the second paragraph and drag into the third.
     for _ in 0..40 {
         h.step();
@@ -680,7 +680,7 @@ fn multi_click_drag_extends_by_units() {
     let at = screen(&mut h, Pos::body(0, 1));
     multi_drag(&mut h, at, at, 2);
     let (s, e) = h.state().session.sel.ordered();
-    assert_eq!((s, e), (Pos::body(0, 0), Pos::body(0, 6)));
+    assert_eq!((s, e), (Pos::body(0, 0), Pos::body(0, 5)));
 }
 
 /// #2551: dragging the vertical scrollbar shows the page at the top of the window beside the

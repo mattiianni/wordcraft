@@ -440,7 +440,7 @@ pub(crate) fn stylesheet(raw: &[crate::stsh::RawStyle], fonts: &[String], standa
     sheet.default_chr.font_ea = font(standard.east_asian);
     sheet.default_chr.font_cs = font(standard.bidi);
     if sheet.default_chr.size.is_none() {
-        sheet.default_chr.size = Some(10.0);
+        sheet.default_chr.size = Some(12.0);
     }
     for (istd, st) in raw.iter().enumerate() {
         if st.name.is_empty() {

@@ -37,7 +37,7 @@ fn qat_button(ui: &mut Ui, app: &mut WordApp, icon: &str, tip: &str, id: &str, e
         ui.painter().rect_filled(r, 4.0, t.hover);
     }
     let c = if enabled { t.icon } else { t.text_disabled };
-    icons::paint(ui.painter(), Rect::from_center_size(r.center(), vec2(16.0, 16.0)), icon, c, if enabled { t.accent } else { c });
+    icons::paint(ui.painter(), Rect::from_center_size(r.center(), vec2(18.0, 18.0)), icon, c, if enabled { t.accent } else { c });
     let sc = crate::widgets::shortcut_text(app, id);
     let resp = resp.on_hover_text(if sc.is_empty() { tip.to_string() } else { format!("{tip} ({sc})") });
     if resp.clicked() && enabled {
@@ -91,7 +91,7 @@ fn quick_access(ui: &mut Ui, app: &mut WordApp) {
     if resp.hovered() {
         ui.painter().rect_filled(r, 4.0, t.hover);
     }
-    icons::paint(ui.painter(), Rect::from_center_size(r.center(), vec2(16.0, 16.0)), "more", t.icon, t.accent);
+    icons::paint(ui.painter(), Rect::from_center_size(r.center(), vec2(18.0, 18.0)), "more", t.icon, t.accent);
     let resp = resp.on_hover_text(tl!("Customize Quick Access Toolbar"));
     crate::rtl::menu(&resp).show(|ui| {
         ui.set_min_width(220.0);
@@ -347,15 +347,25 @@ pub fn title_bar(app: &mut WordApp, ui: &mut Ui) {
                             .selectable(false)
                             .sense(Sense::click()),
                     );
-                    let (r, resp) = ui.allocate_exact_size(vec2(30.0, 16.0), Sense::click());
+                    let (r, resp) = ui.allocate_exact_size(vec2(38.0, 18.0), Sense::click());
                     let (fill, stroke, knob_fill) = match (&block, on) {
                         (Some(_), _) => (t.input.gamma_multiply(0.5), t.border.gamma_multiply(0.7), t.text_dim.gamma_multiply(0.45)),
                         (None, true) => (t.accent, t.accent, t.on_accent),
                         (None, false) => (t.input, t.border_strong, t.text_dim),
                     };
-                    ui.painter().rect(r, 8.0, fill, Stroke::new(1.0, stroke), egui::StrokeKind::Inside);
+                    ui.painter().rect(r, 9.0, fill, Stroke::new(1.0, stroke), egui::StrokeKind::Inside);
                     let knob = autosave_knob_x(rtl, on, r);
-                    ui.painter().circle_filled(pos2(knob, r.center().y), 5.0, knob_fill);
+                    let text_x = crate::rtl::lead_x(rtl == on, r, 13.0);
+                    let label = if on { "On" } else { "Off" };
+                    let text_color = if block.is_some() {
+                        t.text_dim.gamma_multiply(0.6)
+                    } else if on {
+                        t.on_accent
+                    } else {
+                        t.text_dim
+                    };
+                    ui.painter().text(pos2(text_x, r.center().y), Align2::CENTER_CENTER, label, regular(9.5), text_color);
+                    ui.painter().circle_filled(pos2(knob, r.center().y), 6.0, knob_fill);
                     let tip = block
                         .as_ref()
                         .map_or_else(|| tl!("AutoSave saves every change to the file (needs a saved document)").to_string(), |b| b.reason());
@@ -612,7 +622,8 @@ fn search_box(app: &mut WordApp, ui: &mut Ui, control_h: f32) {
     let (r, resp) = ui.allocate_exact_size(vec2(SEARCH_BOX_W, control_h), Sense::click());
     let ph = tl!("Search commands and help");
     resp.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, true, ph));
-    ui.painter().rect(r, 6.0, if resp.hovered() { t.input } else { t.ribbon }, Stroke::new(1.0, t.border), egui::StrokeKind::Inside);
+    let pill_radius = (control_h / 2.0).round();
+    ui.painter().rect(r, pill_radius, if resp.hovered() { t.input } else { t.ribbon }, Stroke::new(1.0, t.border), egui::StrokeKind::Inside);
     icons::paint(
         ui.painter(),
         Rect::from_center_size(pos2(crate::rtl::lead_x(rtl, r, 16.0), r.center().y), vec2(16.0, 16.0)),

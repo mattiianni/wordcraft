@@ -56,7 +56,8 @@ Dependencies and assets use SPDX identifiers. An expression is allowed when ever
 WordCraft is a clean-room, open-source, Rust-native word processor targeting Microsoft Word parity — and going further on speed, openness and agent control. It runs natively on macOS, Windows, Linux and BSD, and on the web via WASM. Siblings with the same conventions: `../photocraft` (Photoshop), `../vectorcraft` (Illustrator), `../filmcraft` (Premiere), `../lightcraft` (Lightroom), `../pdfcraft` (Acrobat), `../effectcraft` (After Effects), `../designcraft` (InDesign).
 
 ## Start every session here
-Read [`ROADMAP.md`](ROADMAP.md), [`docs/gaps.md`](docs/gaps.md) and [`docs/roadmap.md`](docs/roadmap.md). `plan/` is an optional gitignored notebook. Do not ask for it and do not stop when it is absent.
+0. **Check upstream updates and preserve user customizations**: At the start of every session, check if there are new commits from `origin/main` (`scripts/sync_upstream.sh` or `git fetch origin main && git log HEAD..origin/main --oneline`). If upstream has updates, rebase to incorporate community improvements while **strictly preserving all user custom modifications** documented in `CHANGELOG_CUSTOM.md` (Italian translations, Fluent dialogs, standard hyphen `-`, lowercase paragraph starts, 12pt lists with 6pt spacing, direct Finder file opening). Recompile release, install to `/Applications/WordCraft.app`, sign, `cargo clean`, and update fork.
+1. Read [`ROADMAP.md`](ROADMAP.md), [`docs/gaps.md`](docs/gaps.md) and [`docs/roadmap.md`](docs/roadmap.md). `plan/` is an optional gitignored notebook. Do not ask for it and do not stop when it is absent.
 
 ## Never crash
 People trust WordCraft with their writing; a crash loses their work. **This outranks feature work**: never ship a feature through a panic path, and fix a crash before building on top of it.

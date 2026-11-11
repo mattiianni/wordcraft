@@ -42,7 +42,7 @@ pub(crate) fn bg(ui: &Ui, r: Rect, resp: &Response, checked: bool, t: &Tokens) {
 /// pass `false` so their visual state cannot imply that they are interactive.
 pub(crate) fn bg_if(ui: &Ui, r: Rect, resp: &Response, checked: bool, t: &Tokens, on: bool) {
     let hover = ui.ctx().animate_bool_responsive(resp.id.with("hover"), resp.hovered() && on);
-    let fill = if resp.is_pointer_button_down_on() && on {
+    let fill = if (resp.is_pointer_button_down_on() || (checked && resp.hovered())) && on {
         t.pressed
     } else if checked {
         t.checked
@@ -51,10 +51,7 @@ pub(crate) fn bg_if(ui: &Ui, r: Rect, resp: &Response, checked: bool, t: &Tokens
     } else {
         return;
     };
-    ui.painter().rect_filled(r, CornerRadius::same(4), fill);
-    if checked {
-        ui.painter().rect_stroke(r, CornerRadius::same(4), Stroke::new(1.0, t.accent.linear_multiply(0.5)), egui::StrokeKind::Inside);
-    }
+    ui.painter().rect_filled(r, CornerRadius::same(3), fill);
 }
 
 /// Runs a ribbon button's command, then hands keyboard focus back to the document so typing
@@ -113,7 +110,7 @@ fn big_button(ui: &mut Ui, app: &mut WordApp, icon: &str, label: &str, id: &str,
     keytip_badge(ui, r, id, &label.replace('\n', " "));
     let on = enabled(app, id);
     bg_if(ui, r, &resp, checked, &t, on);
-    let ic = Rect::from_center_size(pos2(r.center().x, r.min.y + BIG_ICON_Y), vec2(32.0, 32.0));
+    let ic = Rect::from_center_size(pos2(r.center().x, r.min.y + BIG_ICON_Y), vec2(35.0, 35.0));
     let (c, a) = if on { (t.icon, t.accent) } else { (t.text_disabled, t.text_disabled) };
     icons::paint(ui.painter(), ic, icon, c, a);
     let mut y = r.min.y + BIG_LABEL_Y;
@@ -155,7 +152,7 @@ pub fn small(ui: &mut Ui, app: &mut WordApp, icon: &str, label: Option<&str>, ti
     let on = enabled(app, id);
     bg_if(ui, r, &resp, checked, &t, on);
     let rtl = crate::rtl::flows(ui);
-    let ic = Rect::from_center_size(pos2(crate::rtl::lead_x(rtl, r, 12.0), r.center().y), vec2(17.0, 17.0));
+    let ic = Rect::from_center_size(pos2(crate::rtl::lead_x(rtl, r, 12.0), r.center().y), vec2(19.0, 19.0));
     let (c, a) = if on { (t.icon, t.accent) } else { (t.text_disabled, t.text_disabled) };
     icons::paint(ui.painter(), ic, icon, c, a);
     if let Some(l) = label {
@@ -190,7 +187,7 @@ pub fn split(
     let on = enabled(app, id);
     bg_if(ui, r, &resp, checked, &t, on);
     bg_if(ui, ar, &aresp, false, &t, on);
-    let ic = Rect::from_center_size(r.center(), vec2(17.0, 17.0));
+    let ic = Rect::from_center_size(r.center(), vec2(19.0, 19.0));
     let (c, a) = if on { (t.icon, t.accent) } else { (t.text_disabled, t.text_disabled) };
     icons::paint(ui.painter(), ic, icon, c, a);
     if let Some(sw) = swatch {
@@ -260,7 +257,7 @@ pub fn menu_button(ui: &mut Ui, app: &mut WordApp, options: MenuButtonOptions<'_
         let (r, resp) = ui.allocate_exact_size(vec2(w, CONTENT_H), Sense::click());
         keytip_badge(ui, r, "menu", tip);
         bg_if(ui, r, &resp, false, &t, on);
-        icons::paint(ui.painter(), Rect::from_center_size(pos2(r.center().x, r.min.y + BIG_ICON_Y), vec2(32.0, 32.0)), icon, c, a);
+        icons::paint(ui.painter(), Rect::from_center_size(pos2(r.center().x, r.min.y + BIG_ICON_Y), vec2(35.0, 35.0)), icon, c, a);
         let lines: Vec<&str> = label.unwrap_or("").split('\n').collect();
         let mut y = r.min.y + BIG_LABEL_Y;
         for (i, l) in lines.iter().enumerate() {
@@ -275,7 +272,7 @@ pub fn menu_button(ui: &mut Ui, app: &mut WordApp, options: MenuButtonOptions<'_
         bg_if(ui, r, &resp, false, &t, on);
         let rtl = crate::rtl::flows(ui);
         let lead = |inset: f32| crate::rtl::lead_x(rtl, r, inset);
-        icons::paint(ui.painter(), Rect::from_center_size(pos2(lead(12.0), r.center().y), vec2(17.0, 17.0)), icon, c, a);
+        icons::paint(ui.painter(), Rect::from_center_size(pos2(lead(12.0), r.center().y), vec2(19.0, 19.0)), icon, c, a);
         if let Some(l) = label {
             ui.painter().text(pos2(lead(24.0), r.center().y), crate::rtl::lead_center(rtl), l, regular(11.5), text);
         }

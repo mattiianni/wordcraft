@@ -14,7 +14,7 @@ pub fn icon_button(ui: &mut Ui, icon: &str, tip: &str) -> Response {
     let (r, resp) = ui.allocate_exact_size(vec2(22.0, 22.0), Sense::click());
     let st = drawn_state(ui, &resp, false);
     ui.painter().rect_filled(r, CornerRadius::same(4), st.fill);
-    icons::paint(ui.painter(), Rect::from_center_size(r.center(), vec2(14.0, 14.0)), icon, t.icon, t.accent);
+    icons::paint(ui.painter(), Rect::from_center_size(r.center(), vec2(16.0, 16.0)), icon, t.icon, t.accent);
     resp.on_hover_text(tip)
 }
 
@@ -46,7 +46,7 @@ fn icon_text_button_size(ui: &Ui, text_w: f32, marker: bool, show_text: bool) ->
     let pad = ui.spacing().button_padding;
     let gap = if show_text { 4.0 } else { 0.0 };
     let marker_w = if marker { DROPDOWN + 4.0 } else { 0.0 };
-    pad.x + 16.0 + gap + text_w + marker_w + pad.x
+    pad.x + 18.0 + gap + text_w + marker_w + pad.x
 }
 
 /// Allocates and paints a themed icon button with optional text, marker and accessible label, and
@@ -55,7 +55,7 @@ fn icon_text_button_with(ui: &mut Ui, icon: &str, text: &str, font: egui::FontId
     let t = Tokens::get(ui.ctx());
     let galley = ui.painter().layout_no_wrap(text.to_string(), font, Color32::PLACEHOLDER);
     let pad = ui.spacing().button_padding;
-    let icon_w = 16.0;
+    let icon_w = 18.0;
     let text_w = if show_text { galley.size().x } else { 0.0 };
     let size = vec2(icon_text_button_size(ui, text_w, marker, show_text), galley.size().y.max(icon_w) + 2.0 * pad.y);
     let (r, resp) = ui.allocate_exact_size(size, Sense::click());
@@ -91,7 +91,7 @@ pub fn icon_menu_item(ui: &mut Ui, icon: &str, text: &str, shortcut: &str, min_w
     let galley = ui.painter().layout_no_wrap(text.to_string(), font.clone(), Color32::PLACEHOLDER);
     let sc = (!shortcut.is_empty()).then(|| ui.painter().layout_no_wrap(shortcut.to_string(), font, Color32::PLACEHOLDER));
     let pad = ui.spacing().button_padding;
-    let icon_w = 16.0;
+    let icon_w = 18.0;
     let sc_w = sc.as_ref().map_or(0.0, |g| g.size().x + 3.0 * pad.x);
     let w = (pad.x + icon_w + 6.0 + galley.size().x + sc_w + pad.x).max(min_w).max(ui.available_width());
     let (r, resp) = ui.allocate_exact_size(vec2(w, galley.size().y.max(icon_w) + 2.0 * pad.y), Sense::click());

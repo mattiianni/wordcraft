@@ -23,7 +23,7 @@ fn an_unset_default_size_keeps_its_effective_size_across_save_and_reopen() {
     Arc::make_mut(&mut d.styles).default_chr.size = None;
     assert_eq!(resolved(&d), DEFAULT_FONT_SIZE);
     let bytes = wordcraft_docx::write(&d).unwrap();
-    assert!(defaults(&styles_xml(&bytes)).contains(r#"<w:sz w:val="22"/>"#));
+    assert!(defaults(&styles_xml(&bytes)).contains(r#"<w:sz w:val="24"/>"#));
     let reopened = wordcraft_docx::read(&bytes).unwrap();
     assert_eq!(resolved(&reopened), DEFAULT_FONT_SIZE);
     // Saving again changes nothing further.
@@ -53,7 +53,7 @@ fn a_file_that_omits_the_default_size_is_still_read_as_ten_points() {
         zw.write_all(body.as_bytes()).unwrap();
     }
     let d = wordcraft_docx::read(&zw.finish().unwrap().into_inner()).unwrap();
-    assert_eq!(d.styles.default_chr.size, Some(10.0));
+    assert_eq!(d.styles.default_chr.size, Some(12.0));
 }
 #[test]
 fn an_unset_default_size_does_not_take_a_styles_size() {

@@ -24,7 +24,10 @@ fn deleting_a_preceding_empty_heading_keeps_the_body_paragraph_style() {
 
 /// Create an empty session for command-driven typing fixtures.
 fn s() -> Session {
-    Session::new(wordcraft_doc::Document::new())
+    let mut session = Session::new(wordcraft_doc::Document::new());
+    session.prefs.autocorrect.cap_paragraphs = true;
+    session.prefs.autocorrect.dashes = true;
+    session
 }
 
 /// Execute a registry command and report its id on a test failure.
@@ -567,7 +570,7 @@ fn ordinals_become_superscript() {
 #[test]
 fn bold_and_italic_marks_become_formatting() {
     let mut s = s();
-    run(&mut s, "tools.autocorrect", json!({"boldItalic": true, "capSentences": false}));
+    run(&mut s, "tools.autocorrect", json!({"boldItalic": true, "capSentences": false, "capParagraphs": false}));
     typ(&mut s, "say *very* nice, _quite_ good *two words*. ok\n*end*\nnext");
     assert_eq!(s.doc.plain_text(StoryRef::Body), "say very nice, quite good two words. ok\nend\nnext");
     let p = s.doc.para_at(&Pos::body(0, 0)).unwrap();
@@ -708,7 +711,7 @@ fn autocorrect_goes_on_after_bold_and_italic_marks() {
 #[test]
 fn bold_and_italic_marks_stay_as_typed_unless_they_enclose_words() {
     let mut s = s();
-    run(&mut s, "tools.autocorrect", json!({"boldItalic": true, "capSentences": false}));
+    run(&mut s, "tools.autocorrect", json!({"boldItalic": true, "capSentences": false, "capParagraphs": false}));
     let keys = "2*3* file_name_ * x* *x * ** __ *?!* _-_ ";
     typ(&mut s, keys);
     assert_eq!(s.doc.plain_text(StoryRef::Body), keys);
@@ -747,7 +750,7 @@ fn web_addresses_become_links() {
 #[test]
 fn dashes() {
     let s = typed("a -- b and c - d and e--f and café--g ");
-    assert_eq!(s.doc.plain_text(StoryRef::Body), "A – b and c – d and e—f and café—g ");
+    assert_eq!(s.doc.plain_text(StoryRef::Body), "A – b and c - d and e—f and café—g ");
 }
 
 /// #2036: a dash AutoFormat makes right after a symbol is text, not the symbol's font.
@@ -762,19 +765,18 @@ fn a_dash_after_a_symbol_is_not_in_the_symbol_font() {
     assert_eq!(p.props_of_char(dash).sym_font, None);
 }
 
-/// #2036: the en dashes of "x -- y" and "x - y" after a symbol (and its symbol-font space) are
+/// #2036: the en dashes of "x -- y" after a symbol (and its symbol-font space) are
 /// text, not the symbol's font.
 #[test]
 fn en_dashes_after_a_symbol_are_not_in_the_symbol_font() {
-    for keys in ["-- f ", "- f "] {
-        let mut s = s();
-        typ(&mut s, "e");
-        run(&mut s, "insert.symbol", json!({"char": "\u{F0FC} ", "font": "Wingdings"}));
-        typ(&mut s, keys);
-        let p = s.doc.para_at(&Pos::body(0, 0)).unwrap();
-        let dash = p.text.find('\u{2013}').unwrap_or_else(|| panic!("en dash for {keys:?}: {:?}", p.text));
-        assert_eq!(p.props_of_char(dash).sym_font, None, "{keys:?}");
-    }
+    let keys = "-- f ";
+    let mut s = s();
+    typ(&mut s, "e");
+    run(&mut s, "insert.symbol", json!({"char": "\u{F0FC} ", "font": "Wingdings"}));
+    typ(&mut s, keys);
+    let p = s.doc.para_at(&Pos::body(0, 0)).unwrap();
+    let dash = p.text.find('\u{2013}').unwrap_or_else(|| panic!("en dash for {keys:?}: {:?}", p.text));
+    assert_eq!(p.props_of_char(dash).sym_font, None, "{keys:?}");
 }
 
 /// #2036: an AutoCorrect replacement of a word that starts with a symbol-font character is text.
@@ -4035,4 +4037,41 @@ fn issues_1281_1045_english_dialects_proof_typed_text() {
     let issues = s.run("review.issues", &json!({})).unwrap();
     let words: Vec<&str> = issues.as_array().unwrap().iter().filter(|i| i["kind"] == "spelling").filter_map(|i| i["text"].as_str()).collect();
     assert_eq!(words, ["21th"]);
+}
+
+#[test]
+fn default_preferences_lowercase_start_and_standard_hyphen() {
+    let mut session = Session::new(wordcraft_doc::Document::new());
+    // Out of the box defaults
+    assert!(!session.prefs.autocorrect.cap_paragraphs);
+    assert!(!session.prefs.autocorrect.dashes);
+
+    // 1. Start of paragraph / document remains lowercase
+    typ(&mut session, "ciao ");
+    assert_eq!(session.doc.plain_text(StoryRef::Body), "ciao ");
+
+    // 2. After semicolon remains lowercase
+    typ(&mut session, "; prova ");
+    assert_eq!(session.doc.plain_text(StoryRef::Body), "ciao ; prova ");
+
+    // 3. After newline (a capo) remains lowercase
+    typ(&mut session, "\nancora ");
+    assert_eq!(session.doc.plain_text(StoryRef::Body), "ciao ; prova \nancora ");
+
+    // 4. In bullet list remains lowercase
+    typ(&mut session, "\n- voce ");
+    assert_eq!(session.doc.plain_text(StoryRef::Body), "ciao ; prova \nancora \nvoce ");
+
+    // 5. In numbered list remains lowercase (exit previous list with enter, then start numbered list)
+    typ(&mut session, "\n\n1. numero ");
+    assert_eq!(session.doc.plain_text(StoryRef::Body), "ciao ; prova \nancora \nvoce \nnumero ");
+
+    // 6. After period, question mark, and exclamation mark it capitalizes
+    typ(&mut session, "\n\nfine. inizio? davvero! certo ");
+    assert_eq!(session.doc.plain_text(StoryRef::Body), "ciao ; prova \nancora \nvoce \nnumero \nfine. Inizio? Davvero! Certo ");
+
+    // 7. Single hyphen between words is not converted to en-dash
+    let mut s2 = Session::new(wordcraft_doc::Document::new());
+    typ(&mut s2, "parola - altra ");
+    assert_eq!(s2.doc.plain_text(StoryRef::Body), "parola - altra ");
 }

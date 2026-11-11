@@ -297,7 +297,8 @@ impl Package {
 
     /// The stored spelling of part `name` (leading `/` ignored; case-insensitive).
     pub fn canonical(&self, name: &str) -> Option<&str> {
-        self.lower.get(&name.trim_start_matches('/').to_ascii_lowercase()).map(String::as_str)
+        let norm = name.replace('\\', "/");
+        self.lower.get(&norm.trim_start_matches('/').to_ascii_lowercase()).map(String::as_str)
     }
 
     /// Part bytes by name (leading `/` ignored; case-insensitive fallback).
@@ -448,7 +449,8 @@ fn rel_targets(files: &BTreeMap<String, Arc<Vec<u8>>>) -> HashSet<String> {
 
 /// Resolve a relative target against a source directory into a package path.
 pub fn resolve(dir: &str, target: &str) -> String {
-    let target = target.split('#').next().unwrap_or(target);
+    let norm = target.replace('\\', "/");
+    let target = norm.split('#').next().unwrap_or(&norm);
     let mut parts: Vec<&str> = if target.starts_with('/') { Vec::new() } else { dir.split('/').filter(|s| !s.is_empty()).collect() };
     for seg in target.split('/') {
         match seg {

@@ -29,6 +29,13 @@ pub(super) fn painter_double_click(app: &mut WordApp) {
 pub(super) fn home(app: &mut WordApp, ui: &mut Ui) {
     let st = app.session.run("format.state", &json!({})).unwrap_or_default();
     let flag = |k: &str| st.get(k).and_then(Value::as_bool).unwrap_or(false);
+    group(ui, "Undo", None, app, |ui, app| {
+        stack(ui, |ui| {
+            let undo_tip = crate::i18n::prefixed("Undo", app.session.undo_label().unwrap_or(""));
+            small(ui, app, "undo", None, &undo_tip, crate::widgets::ButtonAction::new("edit.undo", json!({}), false));
+            small(ui, app, "redo", None, "Redo", crate::widgets::ButtonAction::new("edit.redo", json!({}), false));
+        });
+    });
     group(ui, "Clipboard", Some("edit.clipboardPane"), app, |ui, app| {
         menu_button(ui, app, crate::widgets::MenuButtonOptions::new("paste", Some("Paste"), "Paste (⌘V)", true, "edit.paste"), |ui, app| {
             mi(ui, app, "Paste", "edit.paste", json!({}));

@@ -103,7 +103,13 @@ impl Reader<'_> {
         if let Some(k) = self.media_by_path.get(&rel.target) {
             return Some(k.clone());
         }
-        let Some(bytes) = self.pkg.get_shared(&rel.target) else {
+        let fallback_with_word = format!("word/{}", rel.target.trim_start_matches('/'));
+        let Some(bytes) = self
+            .pkg
+            .get_shared(&rel.target)
+            .or_else(|| self.pkg.get_shared(rel.target.trim_start_matches("word/")))
+            .or_else(|| self.pkg.get_shared(&fallback_with_word))
+        else {
             self.note_missing_picture(&rel.target, MissingPictureReason::MissingPart);
             return None;
         };

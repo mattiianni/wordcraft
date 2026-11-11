@@ -5,8 +5,8 @@ use std::sync::Arc;
 use egui::{Align2, Color32, CornerRadius, FontData, FontDefinitions, FontFamily, FontId, Rect, Stroke, Visuals};
 
 /// WordCraft's app colour (and its darker ink for text on light backgrounds).
-pub const APP_COLOR: Color32 = Color32::from_rgb(0x3B, 0x5B, 0xDB);
-pub const APP_INK: Color32 = Color32::from_rgb(0x2B, 0x47, 0xB5);
+pub const APP_COLOR: Color32 = Color32::from_rgb(0x0F, 0x6C, 0xBD);
+pub const APP_INK: Color32 = Color32::from_rgb(0x0C, 0x4E, 0x8C);
 
 /// The interface theme setting (File › Options › General, View › Interface Theme): a fixed light or
 /// dark palette, or `System`, which follows the OS light/dark appearance live (#115). Dark page
@@ -304,32 +304,32 @@ impl Tokens {
     pub fn light() -> Self {
         Tokens {
             dark: false,
-            title_bar: Color32::from_rgb(0xF0, 0xF0, 0xF0),
-            ribbon: Color32::from_rgb(0xF9, 0xF9, 0xF9),
-            tab_strip: Color32::from_rgb(0xF0, 0xF0, 0xF0),
-            canvas: Color32::from_rgb(0xE6, 0xE6, 0xE6),
-            panel: Color32::from_rgb(0xFA, 0xFA, 0xFA),
-            border: Color32::from_rgb(0xE1, 0xE1, 0xE1),
-            border_strong: Color32::from_rgb(0xC8, 0xC8, 0xC8),
+            title_bar: Color32::from_rgb(0xF3, 0xF3, 0xF3),
+            ribbon: Color32::from_rgb(0xFF, 0xFF, 0xFF),
+            tab_strip: Color32::from_rgb(0xF3, 0xF3, 0xF3),
+            canvas: Color32::from_rgb(0xED, 0xEB, 0xE9),
+            panel: Color32::from_rgb(0xF8, 0xF8, 0xF8),
+            border: Color32::from_rgb(0xE1, 0xDF, 0xDD),
+            border_strong: Color32::from_rgb(0xC8, 0xC6, 0xC4),
             text: Color32::from_rgb(0x24, 0x24, 0x24),
             text_dim: Color32::from_rgb(0x61, 0x61, 0x61),
             text_disabled: Color32::from_rgb(0xA8, 0xA8, 0xA8),
             icon: Color32::from_rgb(0x42, 0x42, 0x42),
-            hover: Color32::from_rgb(0xE6, 0xE6, 0xE6),
-            pressed: Color32::from_rgb(0xD6, 0xD6, 0xD6),
-            checked: Color32::from_rgb(0xDD, 0xE3, 0xF8),
+            hover: Color32::from_rgb(0xF3, 0xF2, 0xF1),
+            pressed: Color32::from_rgb(0xED, 0xEB, 0xE9),
+            checked: Color32::from_rgb(0xE2, 0xE2, 0xE2),
             accent: APP_COLOR,
             nav: APP_COLOR,
             accent_text: APP_INK,
             on_accent: Color32::WHITE,
             input: Color32::WHITE,
-            input_border: Color32::from_rgb(0x8A, 0x8A, 0x8A),
-            group_label: Color32::from_rgb(0x70, 0x70, 0x70),
+            input_border: Color32::from_rgb(0x8A, 0x88, 0x86),
+            group_label: Color32::from_rgb(0x61, 0x61, 0x61),
             ruler: Color32::from_rgb(0xFF, 0xFF, 0xFF),
-            ruler_margin: Color32::from_rgb(0xD4, 0xD4, 0xD4),
-            ruler_tick: Color32::from_rgb(0x70, 0x70, 0x70),
-            status_bar: Color32::from_rgb(0xF0, 0xF0, 0xF0),
-            selection: Color32::from_rgba_unmultiplied(0x3B, 0x5B, 0xDB, 0x48),
+            ruler_margin: Color32::from_rgb(0xE9, 0xE9, 0xE9),
+            ruler_tick: Color32::from_rgb(0x61, 0x61, 0x61),
+            status_bar: Color32::from_rgb(0xF3, 0xF3, 0xF3),
+            selection: Color32::from_rgba_unmultiplied(0x0F, 0x6C, 0xBD, 0x38),
             find_highlight: Color32::from_rgba_unmultiplied(0xFF, 0xE0, 0x3D, 0x90),
             page_shadow: Color32::from_rgba_unmultiplied(0, 0, 0, 0x22),
             handle: Color32::WHITE,
@@ -868,32 +868,32 @@ fn visuals(t: &Tokens) -> Visuals {
     v.window_fill = t.menu;
     v.extreme_bg_color = t.input;
     v.faint_bg_color = t.panel;
-    v.window_stroke = Stroke::new(1.0, t.border_strong);
-    v.window_corner_radius = CornerRadius::same(8);
-    v.menu_corner_radius = CornerRadius::same(6);
+    v.window_stroke = Stroke::new(1.0, if t.dark { Color32::from_rgb(0x42, 0x42, 0x42) } else { Color32::from_rgb(0xE2, 0xE2, 0xE2) });
+    v.window_corner_radius = CornerRadius::same(10);
+    v.menu_corner_radius = CornerRadius::same(8);
     v.selection.bg_fill = t.selection;
     v.selection.stroke = Stroke::new(1.0, t.accent);
     v.hyperlink_color = t.accent_text;
     v.widgets.noninteractive.bg_stroke = Stroke::new(1.0, t.border);
     v.widgets.noninteractive.fg_stroke = Stroke::new(1.0, t.text);
     v.widgets.inactive.bg_fill = t.input;
-    v.widgets.inactive.weak_bg_fill = t.input;
-    v.widgets.inactive.bg_stroke = Stroke::new(1.0, t.input_border);
+    v.widgets.inactive.weak_bg_fill = Color32::TRANSPARENT;
+    v.widgets.inactive.bg_stroke = Stroke::new(1.0, t.border);
     v.widgets.inactive.fg_stroke = Stroke::new(1.0, t.text);
-    v.widgets.inactive.corner_radius = CornerRadius::same(4);
+    v.widgets.inactive.corner_radius = CornerRadius::same(5);
     v.widgets.hovered.bg_fill = t.hover;
     v.widgets.hovered.weak_bg_fill = t.hover;
-    v.widgets.hovered.bg_stroke = Stroke::new(1.0, t.border_strong);
+    v.widgets.hovered.bg_stroke = Stroke::new(1.0, if t.dark { Color32::from_rgb(0x55, 0x55, 0x55) } else { Color32::from_rgb(0xD2, 0xD2, 0xD2) });
     v.widgets.hovered.fg_stroke = Stroke::new(1.0, t.text);
-    v.widgets.hovered.corner_radius = CornerRadius::same(4);
+    v.widgets.hovered.corner_radius = CornerRadius::same(5);
     v.widgets.active.bg_fill = t.pressed;
     v.widgets.active.weak_bg_fill = t.pressed;
     v.widgets.active.fg_stroke = Stroke::new(1.0, t.text);
-    v.widgets.active.corner_radius = CornerRadius::same(4);
+    v.widgets.active.corner_radius = CornerRadius::same(5);
     v.widgets.open.bg_fill = t.pressed;
-    v.widgets.open.weak_bg_fill = t.pressed;
-    v.popup_shadow = egui::Shadow { offset: [0, 4], blur: 16, spread: 0, color: Color32::from_black_alpha(if t.dark { 120 } else { 40 }) };
-    v.window_shadow = egui::Shadow { offset: [0, 8], blur: 28, spread: 0, color: Color32::from_black_alpha(if t.dark { 140 } else { 50 }) };
+    v.widgets.open.weak_bg_fill = t.menu;
+    v.popup_shadow = egui::Shadow { offset: [0, 6], blur: 24, spread: 0, color: Color32::from_black_alpha(if t.dark { 100 } else { 25 }) };
+    v.window_shadow = egui::Shadow { offset: [0, 8], blur: 32, spread: 0, color: Color32::from_black_alpha(if t.dark { 120 } else { 30 }) };
     v
 }
 
